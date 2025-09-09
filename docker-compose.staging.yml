@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  frontend-staging:
+    image: ghcr.io/yourusername/semantic-shift-frontend:staging
+    container_name: semantic-shift-frontend-staging
+    restart: unless-stopped
+    networks:
+      - semantic-shift-staging
+
+  backend-staging:
+    image: ghcr.io/yourusername/semantic-shift-backend:staging
+    container_name: semantic-shift-backend-staging
+    restart: unless-stopped
+    environment:
+      - DEBUG=false
+      - DATABASE_URL=sqlite:///tmp/app.db
+      - BACKEND_CORS_ORIGINS=https://semdev.yourdomain.com
+    volumes:
+      # Temporary storage for SQLite - will be cleaned up after sessions
+      - /tmp/semantic-shift-staging:/tmp
+    networks:
+      - semantic-shift-staging
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  semantic-shift-staging:
+    name: semantic-shift-staging
+    driver: bridge

@@ -1,0 +1,97 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Only semantic version tags trigger production deployment
+
+env:
+  REGISTRY: ghcr.io
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}-frontend
+  BACKEND_IMAGE_NAME: ${{ github.repository }}-backend
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=production
+            type=raw,value=latest
+
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=production
+            type=raw,value=latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile.prod
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile.prod
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            # Navigate to production directory
+            cd /opt/semantic-shift/production
+            
+            # Update docker-compose file with new image tags
+            sed -i "s|ghcr.io/.*/semantic-shift-frontend:.*|${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:production|g" docker-compose.yml
+            sed -i "s|ghcr.io/.*/semantic-shift-backend:.*|${{ env.REGISTRY }}/${{ env.BACKEND_IMAGE_NAME }}:production|g" docker-compose.yml
+            
+            # Pull new images
+            docker compose pull
+            
+            # Stop and remove old containers
+            docker compose down
+            
+            # Start new containers
+            docker compose up -d
+            
+            # Clean up old images
+            docker image prune -f
+            
+            # Verify deployment
+            sleep 10
+            docker compose ps

@@ -1,0 +1,35 @@
+{
+  "name": "semantic-change-analysis",
+  "version": "1.0.0",
+  "description": "Semantic shift visualization using word embeddings",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:frontend": "cd frontend && pnpm dev",
+    "dev:backend": "cd backend && uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+    "build": "cd frontend && pnpm build",
+    "install:all": "pnpm install && cd backend && uv sync",
+    "start": "cd backend && uv run uvicorn main:app --host 0.0.0.0 --port 8000",
+    "test": "cd frontend && pnpm test && cd ../backend && uv run pytest",
+    "format": "cd frontend && pnpm format && cd ../backend && uv run black . && uv run isort .",
+    "lint": "cd frontend && pnpm lint && cd ../backend && uv run flake8 ."
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.10",
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "semantic change",
+    "bias detection",
+    "word embeddings",
+    "cade",
+    "nlp",
+    "word2vec"
+  ],
+  "author": "Kristian Ristic",
+  "license": ""
+}
