@@ -15,6 +15,6 @@
     "add-dev": "uv add --dev"
   },
   "keywords": ["fastapi", "python", "nlp", "visualization"],
-  "author": "Your Name",
+  "author": "Kristian Ristic",
   "license": "MIT"
 } 

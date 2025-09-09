@@ -2,20 +2,20 @@ version: '3.8'
 
 services:
   frontend-production:
-    image: ghcr.io/yourusername/semantic-shift-frontend:production
+    image: ghcr.io/kkristianr/semantic-shift-frontend:production
     container_name: semantic-shift-frontend-production
     restart: unless-stopped
     networks:
       - semantic-shift-production
 
   backend-production:
-    image: ghcr.io/yourusername/semantic-shift-backend:production
+    image: ghcr.io/kkristianr/semantic-shift-backend:production
     container_name: semantic-shift-backend-production
     restart: unless-stopped
     environment:
       - DEBUG=false
       - DATABASE_URL=sqlite:///tmp/app.db
-      - BACKEND_CORS_ORIGINS=https://sem.yourdomain.com
+      - BACKEND_CORS_ORIGINS=https://sem.kristiam.xyz
     volumes:
       # Temporary storage for SQLite - will be cleaned up after sessions
       - /tmp/semantic-shift-production:/tmp

@@ -2,20 +2,20 @@ version: '3.8'
 
 services:
   frontend-staging:
-    image: ghcr.io/yourusername/semantic-shift-frontend:staging
+    image: ghcr.io/kkristianr/semantic-shift-frontend:staging
     container_name: semantic-shift-frontend-staging
     restart: unless-stopped
     networks:
       - semantic-shift-staging
 
   backend-staging:
-    image: ghcr.io/yourusername/semantic-shift-backend:staging
+    image: ghcr.io/kkristianr/semantic-shift-backend:staging
     container_name: semantic-shift-backend-staging
     restart: unless-stopped
     environment:
       - DEBUG=false
       - DATABASE_URL=sqlite:///tmp/app.db
-      - BACKEND_CORS_ORIGINS=https://semdev.yourdomain.com
+      - BACKEND_CORS_ORIGINS=https://semdev.kristiam.xyz
     volumes:
       # Temporary storage for SQLite - will be cleaned up after sessions
       - /tmp/semantic-shift-staging:/tmp
