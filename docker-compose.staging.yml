@@ -5,6 +5,8 @@ services:
     image: ghcr.io/kkristianr/semantic-shift-frontend:staging
     container_name: semantic-shift-frontend-staging
     restart: unless-stopped
+    ports:
+      - "8080:80"
     networks:
       - semantic-shift-staging
 
@@ -12,10 +14,12 @@ services:
     image: ghcr.io/kkristianr/semantic-shift-backend:staging
     container_name: semantic-shift-backend-staging
     restart: unless-stopped
+    ports:
+      - "8000:8000"
     environment:
       - DEBUG=false
-      - DATABASE_URL=sqlite:///tmp/app.db
-      - BACKEND_CORS_ORIGINS=https://semdev.kristiam.xyz
+      - DATABASE_URL=sqlite:///app/app.db
+      - BACKEND_CORS_ORIGINS="https://semdev.kristiam.xyz,http://localhost:5173"
     volumes:
       # Temporary storage for SQLite - will be cleaned up after sessions
       - /tmp/semantic-shift-staging:/tmp
