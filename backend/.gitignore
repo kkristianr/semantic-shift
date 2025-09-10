@@ -3,7 +3,7 @@
 env.example
 #backend models
 model/
-models/
+/models/
 temp_cade_models/
 
 #logs
